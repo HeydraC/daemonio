@@ -9,6 +9,9 @@
 #include<time.h>
 #include<stdint.h>
 
+#define __STDC_FORMAT_MACROS
+#include<inttypes.h>
+
 bool* changed = NULL;
 
 void exitSig(int sig){
@@ -68,7 +71,6 @@ void commands(struct dirent** files, int dirSize, char checksums[1024][1024]){
 			if (strcmp(buffer, checksums[i])) changed[i] = true;
 
 			strcpy(checksums[i], buffer);
-           	printf("Command %d output:\n%s", i, buffer);
         }
         close(pipefd[0]); // Close read end
         wait(NULL); // Wait for child process
@@ -88,30 +90,56 @@ void unchange(int dirSize){
 	}
 }
 
-void paking(dirent** files, int dirSize){
+void gziping(char *fileName){
+	pid_t pid;
+
+	pid = fork();
+   	if (pid == -1) {
+       	perror("fork");
+       	exit(EXIT_FAILURE);
+   	}
+
+   	if (pid == 0) { // Child process
+   		// Execute command
+   		execl("/bin/gzip", "gzip", fileName, NULL); // Example command
+   		perror("exec");
+   	    exit(EXIT_FAILURE);
+   	}
+}
+
+void paking(struct dirent** files, int dirSize){
 	time_t t;
 	struct tm *tm_info;
-	char time[9];
-	char date[32];
-	char fileName[32];
+	char hour[32], date[32], fileName[32], dir[64], *buffer, pakdir[40] = "folder/";
 	uint64_t fileSize;
 	FILE *pak, *content;
-	char *buffer;
 
 	time(&t);
 
-	strftime(time, sizeof(time), "<%H:%M:%S>", tm_info);
-	strftime(date, sizeof(date), "<%d-%m-%Y>", tm_info);
-	
-	strcat(date, time);
-	strcat(date, ".pak");
+	tm_info = localtime(&t);
 
-	pak = fopen(date, "w");
+	strftime(hour, sizeof(hour), "<%H:%M:%S>", tm_info);
+	strftime(date, sizeof(date), "<%d-%m-%Y>-", tm_info);
+	
+	strcat(date, hour);
+	
+	strcat(date, ".pak");
+	strcat(pakdir, date);
+
+	pak = fopen(pakdir, "w+");
 
 	for (int i = 0; i < dirSize; ++i){
 		if (!changed[i]) continue;
+
+		strcpy(dir, "/var/log/");
+		strcat(dir, files[i]->d_name);
 		
-		content = fopen(files[i]->d_name, "rb");
+		content = fopen(dir, "rb");
+		if (content == NULL){
+			perror("Error opening file");
+			exit(0);
+		}
+		
 		fseek(content, 0, SEEK_END);
    		fileSize = ftell(content);
    		rewind(content);
@@ -123,12 +151,17 @@ void paking(dirent** files, int dirSize){
 		fclose(content);
 
 		strncpy(fileName, files[i]->d_name, 32);
-		fprintf(pak, "%s%d%s\n", fileName, fileSize, buffer);
+		
+		fprintf(pak, "%s%"PRIu64"%s\n", fileName, fileSize, buffer);
 		
 		free(buffer);
 	}
 
+	fprintf(pak, "%s%"PRIu64, "FIN", (uint64_t)0);
+
 	fclose(pak);
+
+	gziping(pakdir);
 }
 
 int main(){
@@ -143,9 +176,9 @@ int main(){
 		if (dirSize < 0){
 			puts("Error reading from /var/log");
 		}else{
-			for (int i = 0; i < dirSize; ++i){
-				puts(files[i]->d_name);
-			}
+			// for (int i = 0; i < dirSize; ++i){
+			// 	puts(files[i]->d_name);
+			// }
 		}
 
 		if (changed == NULL){
@@ -155,9 +188,11 @@ int main(){
 
 		unchange(dirSize);
 
-		commands(files, dirSize, &checksums);
+		commands(files, dirSize, checksums);
 
-		sleep(120);
+		paking(files, dirSize);
+
+		sleep(60);
 	}
 
 	return 0;

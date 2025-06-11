@@ -12,12 +12,14 @@
 #define __STDC_FORMAT_MACROS
 #include<inttypes.h>
 
-bool* changed = NULL;
+uint32_t hashing(char* string){
+	uint32_t hash = 0;
 
-void exitSig(int sig){
-	free(changed);
+	for(int i = 0; string[i] != '\0'; ++i){
+		hash = hash*31 + string[i];
+	}
 
-	exit(0);
+	return hash;
 }
 
 char *ext(const char *filename) {
@@ -34,7 +36,7 @@ int nodirNogz (const struct dirent *file){
 	return strcmp(ext(file->d_name), "gz");
 }
 
-void commands(struct dirent** files, int dirSize, char checksums[1024][1024]){
+void commands(struct dirent** files, int dirSize, char checksums[1024][1024], bool* changed){
     int pipefd[2];
     pid_t pid;
     char buffer[1024];
@@ -68,9 +70,9 @@ void commands(struct dirent** files, int dirSize, char checksums[1024][1024]){
 	        close(pipefd[1]); // Close write end
         	while ((bytesRead = read(pipefd[0], buffer, sizeof(buffer) - 1)) > 0) {
            	buffer[bytesRead] = '\0';
-			if (strcmp(buffer, checksums[i])) changed[i] = true;
+			if (strcmp(buffer, checksums[hashing(files[i]->d_name) % 1024])) changed[i] = true;
 
-			strcpy(checksums[i], buffer);
+			strcpy(checksums[hashing(files[i]->d_name) % 1024], buffer);
         }
         close(pipefd[0]); // Close read end
         wait(NULL); // Wait for child process
@@ -84,7 +86,7 @@ void initSum(char checksums[1024][1024], int dirSize){
 	}
 }
 
-void unchange(int dirSize){
+void unchange(int dirSize, bool* changed){
 	for (int i = 0; i < dirSize; ++i){
 		changed[i] = false;
 	}
@@ -107,7 +109,7 @@ void gziping(char *fileName){
    	}
 }
 
-void paking(struct dirent** files, int dirSize){
+void paking(struct dirent** files, int dirSize, bool* changed){
 	time_t t;
 	struct tm *tm_info;
 	char hour[32], date[32], fileName[32], dir[64], *buffer, pakdir[40] = "folder/";
@@ -118,8 +120,8 @@ void paking(struct dirent** files, int dirSize){
 
 	tm_info = localtime(&t);
 
-	strftime(hour, sizeof(hour), "<%H:%M:%S>", tm_info);
-	strftime(date, sizeof(date), "<%d-%m-%Y>-", tm_info);
+	strftime(hour, sizeof(hour), "%H:%M:%S", tm_info);
+	strftime(date, sizeof(date), "%d-%m-%Y-", tm_info);
 	
 	strcat(date, hour);
 	
@@ -168,29 +170,27 @@ int main(){
 	struct dirent** files;
 	int dirSize;
 	char checksums[1024][1024];
+	bool* changed;
 
-	signal(SIGINT, exitSig);
+	initSum(checksums, dirSize);
 
 	while (1){
 		dirSize = scandir("/var/log", &files, nodirNogz, alphasort);
 		if (dirSize < 0){
 			puts("Error reading from /var/log");
-		}else{
-			// for (int i = 0; i < dirSize; ++i){
-			// 	puts(files[i]->d_name);
-			// }
 		}
 
-		if (changed == NULL){
-			changed = (bool*) malloc(sizeof(bool) * dirSize);
-			initSum(checksums, dirSize);
-		}
+		//for (int i = 0; i < dirSize; ++i) printf("%"PRIu32"\n", hashing(files[i]->d_name) % 1024);
 
-		unchange(dirSize);
+		changed = (bool*) malloc(sizeof(bool) * dirSize);
 
-		commands(files, dirSize, checksums);
+		unchange(dirSize, changed);
 
-		paking(files, dirSize);
+		commands(files, dirSize, checksums, changed);
+
+		paking(files, dirSize, changed);
+
+		free(changed);
 
 		sleep(60);
 	}

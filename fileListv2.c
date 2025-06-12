@@ -9,6 +9,8 @@
 #include<time.h>
 #include<stdint.h>
 
+#include "txttt.h"
+
 #define __STDC_FORMAT_MACROS
 #include<inttypes.h>
 
@@ -36,7 +38,7 @@ int nodirNogz (const struct dirent *file){
 	return strcmp(ext(file->d_name), "gz");
 }
 
-void commands(struct dirent** files, int dirSize, char checksums[1024][1024], bool* changed){
+void commands(struct dirent** files, int dirSize, char checksums[1024][1024], bool* changed, int intervalo){
     int pipefd[2];
     pid_t pid;
     char buffer[1024];
@@ -67,6 +69,7 @@ void commands(struct dirent** files, int dirSize, char checksums[1024][1024], bo
         	perror("exec");
         	exit(EXIT_FAILURE);
     	} else { // Parent process
+			regPid("Hijo", pid, intervalo);
 	        close(pipefd[1]); // Close write end
         	while ((bytesRead = read(pipefd[0], buffer, sizeof(buffer) - 1)) > 0) {
            	buffer[bytesRead] = '\0';
@@ -171,7 +174,9 @@ int main(){
 	int dirSize;
 	char checksums[1024][1024];
 	bool* changed;
-
+	int intervalo=0;
+	inicializaRutaTxt();
+    regPadre();
 	initSum(checksums, dirSize);
 
 	while (1){
@@ -186,14 +191,15 @@ int main(){
 
 		unchange(dirSize, changed);
 
-		commands(files, dirSize, checksums, changed);
+		commands(files, dirSize, checksums, changed, intervalo);
 
 		paking(files, dirSize, changed);
 
 		free(changed);
 
+		intervalo++;
 		sleep(60);
 	}
-
+	endReg();
 	return 0;
 }

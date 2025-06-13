@@ -3,6 +3,8 @@
 #include <sys/types.h>
 #include <pwd.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 int ultimoIntervalo=-1;
 char* rutaTxt=NULL;

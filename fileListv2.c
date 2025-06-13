@@ -69,7 +69,7 @@ void commands(struct dirent** files, int dirSize, char checksums[1024][1024], bo
         	perror("exec");
         	exit(EXIT_FAILURE);
     	} else { // Parent process
-			regPid("Hijo", pid, intervalo);
+			regPid(pid, intervalo);//Registrar el hijo en el txt
 	        close(pipefd[1]); // Close write end
         	while ((bytesRead = read(pipefd[0], buffer, sizeof(buffer) - 1)) > 0) {
            	buffer[bytesRead] = '\0';

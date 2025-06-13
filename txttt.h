@@ -13,7 +13,7 @@ void inicializaRutaTxt();
 void regPadre();
 
 
-void regPid(const char* tipo, pid_t pid, int intervalo);
+void regPid(pid_t pid, int intervalo);
 
 void endReg();
 

@@ -3,6 +3,8 @@
 #include <sys/types.h>
 #include <pwd.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 int ultimoIntervalo=-1;
 char* rutaTxt=NULL;
@@ -20,7 +22,7 @@ void inicializaRutaTxt(){
 void regPadre() {
     if (!rutaTxt) inicializaRutaTxt();
     //abrimos el archivo y escribimos el pid ddel padre
-    FILE *fp = fopen(rutaTxt, "w");
+    FILE *fp = fopen(rutaTxt, "w+");
     fprintf(fp, "PID Padre: %d\n", getpid());
     fclose(fp);
 }

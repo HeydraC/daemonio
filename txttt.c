@@ -24,7 +24,7 @@ void regPadre() {
     fprintf(fp, "PID Padre: %d\n", getpid());
     fclose(fp);
 }
-void regPid(const char* tipo, pid_t pid, int intervalo) {
+void regPid(pid_t pid, int intervalo) {
     if (!rutaTxt) return;
 
     FILE *archivo = fopen(rutaTxt, "a");
@@ -37,7 +37,7 @@ void regPid(const char* tipo, pid_t pid, int intervalo) {
         ultimoIntervalo = intervalo;
     }
     //escribir pid del hijo en el archivo
-    fprintf(archivo, "PID %s: %d\n", tipo, pid);
+    fprintf(archivo, "PID %s: %d\n", pid);
     fclose(archivo);
 }
 

@@ -175,7 +175,7 @@ int main(){
 	char checksums[1024][1024];
 	bool* changed;
 	int intervalo=0;
-	inicializaRutaTxt();
+	inicializaRutaTxt(); 
     regPadre();
 	initSum(checksums, dirSize);
 
@@ -196,7 +196,7 @@ int main(){
 		paking(files, dirSize, changed);
 
 		free(changed);
-
+		//Incrementar intervalo para el registro en el txt
 		intervalo++;
 		sleep(60);
 	}

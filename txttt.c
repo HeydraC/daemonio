@@ -17,7 +17,6 @@ void inicializaRutaTxt(){
     //rutaTxt = malloc(strlen(homedir) + strlen(nombreArchivo) + 2);
     //concatenando con la ruta
     sprintf(rutaTxt, "%s%s", homedir, nombreArchivo);
-    printf("%s\n", rutaTxt);
 }
 
 void regPadre() {

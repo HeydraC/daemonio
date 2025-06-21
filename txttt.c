@@ -7,27 +7,27 @@
 #include <string.h>
 
 int ultimoIntervalo=-1;
-char* rutaTxt=NULL;
+char rutaTxt[256];
 
 void inicializaRutaTxt(){
     //obteniendo el root
-    struct passwd *pw = getpwuid(getuid());
-    const char *homedir = pw->pw_dir;
+    //struct passwd *pw = getpwuid(getuid());
+    const char *homedir = "/";
     const char* nombreArchivo="31703888_31307754_31708119.txt";
-    rutaTxt = malloc(strlen(homedir) + strlen(nombreArchivo) + 2);
+    //rutaTxt = malloc(strlen(homedir) + strlen(nombreArchivo) + 2);
     //concatenando con la ruta
-    sprintf(rutaTxt, "%s/%s", homedir, nombreArchivo);
+    sprintf(rutaTxt, "%s%s", homedir, nombreArchivo);
+    printf("%s\n", rutaTxt);
 }
 
 void regPadre() {
-    if (!rutaTxt) inicializaRutaTxt();
-    //abrimos el archivo y escribimos el pid ddel padre
+    //if (!rutaTxt) inicializaRutaTxt();
+    //abrimos el archivo y escribimos el pid del padre
     FILE *fp = fopen(rutaTxt, "w+");
     fprintf(fp, "PID Padre: %d\n", getpid());
     fclose(fp);
 }
 void regPid(pid_t pid, int intervalo) {
-    if (!rutaTxt) return;
 
     FILE *archivo = fopen(rutaTxt, "a");
     if (!archivo) {
@@ -39,14 +39,10 @@ void regPid(pid_t pid, int intervalo) {
         ultimoIntervalo = intervalo;
     }
     //escribir pid del hijo en el archivo
-    fprintf(archivo, "PID: %d\n", pid);
+    fprintf(archivo, "PID Hijo: %d\n", pid);
     fclose(archivo);
 }
 
 void endReg() {
-    if (rutaTxt) {
-        free(rutaTxt);
-        rutaTxt = NULL;
-    }
     ultimoIntervalo = -1;
 }

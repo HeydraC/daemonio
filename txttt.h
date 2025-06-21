@@ -5,7 +5,7 @@
 #include <unistd.h>
 
 extern int ultimoIntervalo;
-extern char* rutaTxt;
+extern char rutaTxt[256];
 
 void inicializaRutaTxt();
 

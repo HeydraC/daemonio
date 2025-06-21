@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/wait.h>
+#include <sys/stat.h>
 #include <time.h>
 #include <unistd.h>
 #include <syslog.h>
@@ -98,7 +99,7 @@ void commands(struct dirent **files, int dirSize, char checksums[1024][1024],
         strcpy(checksums[hashing(files[i]->d_name) % 1024], buffer);
       }
       close(pipefd[0]); // Close read end
-      wait(NULL);       // Wait for child process
+      wait(NULL);
     }
   }
 }
@@ -119,7 +120,7 @@ void unchange(int dirSize, bool *changed)
   }
 }
 
-void gziping(char *fileName)
+void gziping(char *fileName, int intervalo)
 {
   pid_t pid;
 
@@ -133,20 +134,31 @@ void gziping(char *fileName)
   if (pid == 0)
   { // Child process
     // Execute command
-    execl("/bin/gzip", "gzip", fileName, NULL); // Example command
+    execl("/bin/gzip", "gzip", fileName, NULL);
     syslog(LOG_ERR, "exec");
     exit(EXIT_FAILURE);
   }
+  else{
+ 	regPid(pid, intervalo); // Registrar el hijo en el txt
+  	wait(NULL);
+  }
 }
 
-void paking(struct dirent **files, int dirSize, bool *changed)
+void paking(struct dirent **files, int dirSize, bool *changed, int intervalo)
 {
   time_t t;
+  struct stat sb;
   struct tm *tm_info;
-  char hour[32], date[32], fileName[32], dir[64], *buffer,
-      pakdir[40] = "folder/";
+  char hour[32], date[32], size[32],  dir[64], pakdir[64] = "/var/log/PROYECTO_SO_1";
+  char *buffer, *toWrite;
   uint64_t fileSize;
   FILE *pak, *content;
+
+  if (stat(pakdir, &sb) == -1){
+  	if (mkdir(pakdir, 0700) < 0) syslog(LOG_ERR, "Error creando directorio"); 
+  }
+
+  strcat(pakdir, "/");
 
   time(&t);
 
@@ -160,7 +172,12 @@ void paking(struct dirent **files, int dirSize, bool *changed)
   strcat(date, ".pak");
   strcat(pakdir, date);
 
-  pak = fopen(pakdir, "w+");
+  pak = fopen(pakdir, "wb+");
+  if (pak == NULL)
+  {
+  	syslog(LOG_ERR, "Error abriendo directorio");
+    exit(0);
+  }
 
   for (int i = 0; i < dirSize; ++i)
   {
@@ -173,7 +190,7 @@ void paking(struct dirent **files, int dirSize, bool *changed)
     content = fopen(dir, "rb");
     if (content == NULL)
     {
-      syslog(LOG_ERR, "Error opening file");
+      syslog(LOG_ERR, "Error abriendo archivo");
       exit(0);
     }
 
@@ -182,30 +199,35 @@ void paking(struct dirent **files, int dirSize, bool *changed)
     rewind(content);
 
     buffer = (char *)malloc(sizeof(char) * fileSize);
+    toWrite = (char *)malloc(sizeof(char) * (fileSize + 96));
 
     fread(buffer, 1, fileSize, content);
 
     fclose(content);
 
-    strncpy(fileName, files[i]->d_name, 32);
+    strncpy(toWrite, files[i]->d_name, 32);
+    snprintf(size, sizeof(size), "%" PRIu64, fileSize);
+    strncat(toWrite, size, 32);
+    strncat(toWrite, buffer, fileSize);
 
-    fprintf(pak, "%s%" PRIu64 "%s\n", fileName, fileSize, buffer);
+    //fprintf(pak, "%s%" PRIu64 "%s\n", fileName, fileSize, buffer);
+	fwrite(toWrite, 1, fileSize + 96, pak);
 
     free(buffer);
+    free(toWrite);
   }
 
   fprintf(pak, "%s%" PRIu64, "FIN", (uint64_t)0);
 
   fclose(pak);
 
-  gziping(pakdir);
+  gziping(pakdir, intervalo);
 }
 
 void readProyInit(char *logTag, int *interval, int sideOfLogTag)
 {
 
   FILE *proyInit = fopen("/etc/proyecto_so_1/proy1.ini", "r");
-
   if (proyInit == NULL)
   {
     syslog(LOG_ERR, "Error abriendo archivo proy1.ini\n");
@@ -259,6 +281,7 @@ int main()
   int intervalInitProy = 0;
 
   readProyInit(logTag, &intervalInitProy, 100);
+  
   openlog(logTag, LOG_PID | LOG_CONS, LOG_DAEMON);
 
   syslog(LOG_INFO, "Empezando el proceso fileList con un intervalo de : %d segundos", intervalInitProy);
@@ -294,7 +317,7 @@ int main()
 
     commands(files, dirSize, checksums, changed, intervalo);
 
-    paking(files, dirSize, changed);
+    paking(files, dirSize, changed, intervalo);
 
     free(changed);
 

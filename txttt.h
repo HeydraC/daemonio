@@ -5,7 +5,7 @@
 #include <unistd.h>
 
 extern int ultimoIntervalo;
-extern char rutaTxt[256];
+extern char* rutaTxt;
 
 void inicializaRutaTxt();
 
@@ -15,6 +15,5 @@ void regPadre();
 
 void regPid(pid_t pid, int intervalo);
 
-void endReg();
 
 #endif

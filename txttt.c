@@ -13,7 +13,7 @@ void inicializaRutaTxt(){
     //obteniendo el root
     struct passwd *pw = getpwuid(getuid());
     const char *homedir = pw->pw_dir;
-    const char* nombreArchivo="31703888_31307754_31708119.txt";
+    const char* nombreArchivo="/31703888_31307754_31708119.txt";
     rutaTxt = malloc(strlen(homedir) + strlen(nombreArchivo) + 2);
     //concatenando con la ruta
     sprintf(rutaTxt, "%s/%s", homedir, nombreArchivo);

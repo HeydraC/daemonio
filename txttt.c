@@ -27,14 +27,14 @@ void inicializaRutaTxt(){
 
 
 void regPadre() {
-    if (!rutaTxt) inicializaRutaTxt();
+    
     //abrimos el archivo y escribimos el pid ddel padre
     FILE *fp = fopen(rutaTxt, "w+");
     fprintf(fp, "PID Padre: %d\n", getpid());
     fclose(fp);
 }
 void regPid(pid_t pid, int intervalo) {
-    if (!rutaTxt) return;
+    
 
     FILE *archivo = fopen(rutaTxt, "a");
     if (!archivo) {
@@ -50,10 +50,3 @@ void regPid(pid_t pid, int intervalo) {
     fclose(archivo);
 }
 
-
-    if (rutaTxt) {
-        free(rutaTxt);
-        rutaTxt = NULL;
-    }
-    ultimoIntervalo = -1;
-}

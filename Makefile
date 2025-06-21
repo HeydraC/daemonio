@@ -24,10 +24,10 @@ debug: all
 # Esta regla permite instalar el proyecto como un servicio de sistema asumiendo
 # que el archivo init.sh tenga el formato correcto. Debe ser ejecutada como
 # usuario root.
-install: $(TARGET)
-	cp $(TARGET) /sbin/$(TARGET)
-	cp init.sh /etc/init.d/$(TARGET)
-	chmod 755 /etc/init.d/$(TARGET)
+install: fileList
+	cp fileList /sbin/fileList
+	cp init.sh /etc/init.d/fileList
+	chmod 755 /etc/init.d/fileList
 	update-rc.d exceptd defaults
 
 # Esta regla desinstala el proyecto. Debe ser ejecutada como usuario root

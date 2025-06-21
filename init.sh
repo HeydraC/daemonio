@@ -29,7 +29,7 @@ stop() {
     if [ $? -eq 0 ]
     then
 	echo "Stopping $SERVNAME."
-        kill -2 `pidof $SERVNAME`
+        kill `pidof $SERVNAME`
         echo "Done."
     else
 	echo "$SERVNAME already stopped."

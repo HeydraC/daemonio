@@ -208,7 +208,7 @@ void readProyInit(char *logTag, int *interval, int sideOfLogTag)
 
   if (proyInit == NULL)
   {
-    syslog(LOG_ERR, "Error opening proy1.init file\n");
+    syslog(LOG_ERR, "Error abriendo archivo proy1.ini\n");
     exit(EXIT_FAILURE);
   }
 
@@ -232,7 +232,7 @@ void readProyInit(char *logTag, int *interval, int sideOfLogTag)
     }
     if (seccionConf != 1)
     {
-      syslog(LOG_ERR, "Invalid proy1.init file format\n");
+      syslog(LOG_ERR, "Formato invalido en proy1.ini\n");
       fclose(proyInit);
       exit(EXIT_FAILURE);
     }
@@ -261,8 +261,7 @@ int main()
   readProyInit(logTag, &intervalInitProy, 100);
   openlog(logTag, LOG_PID | LOG_CONS, LOG_DAEMON);
 
-  syslog(LOG_INFO, "Empezando el proceso fileList con un intervalo de : %d segundos",
-         intervalInitProy);
+  syslog(LOG_INFO, "Empezando el proceso fileList con un intervalo de : %d segundos", intervalInitProy);
 
   struct dirent **files;
   int dirSize;

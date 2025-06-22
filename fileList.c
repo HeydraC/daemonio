@@ -327,6 +327,6 @@ int main()
     intervalo++;
     sleep(intervalInitProy);
   }
-  endReg();
+  
   return 0;
 }

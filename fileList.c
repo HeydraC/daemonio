@@ -137,7 +137,7 @@ void paking(struct dirent **files, int dirSize, bool *changed, int intervalo){
   		syslog(LOG_ERR, "Error creando directorio"); 
   }
 
-  strcat(pakdir, "/"); //Y se agrega el caracter para separar el nombre del archivo
+  strcat(pakdir, "/logs"); //Y se agrega el caracter para separar el nombre del archivo
 
   time(&t);
 

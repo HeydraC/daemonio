@@ -10,8 +10,8 @@ CFLAGS =
 # Punto de entrada para make si se ejecuta sin parametros.
 all: fileList
 
-fileList: fileList.o txttt.o
-	gcc -o fileList fileList.o txttt.o
+fileList: fileList.o txttt.o daemonizar.o
+	gcc -o fileList fileList.o txttt.o daemonizar.o
 
 %.o: %.c $(wildcard %.h)
 	gcc -c $<
@@ -28,7 +28,6 @@ install: fileList
 	cp fileList /sbin/fileList
 	cp init.sh /etc/init.d/fileList
 	chmod 755 /etc/init.d/fileList
-	update-rc.d exceptd defaults
 
 # Esta regla desinstala el proyecto. Debe ser ejecutada como usuario root
 # despues de haber ejecutado la regla install.

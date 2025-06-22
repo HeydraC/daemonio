@@ -12,6 +12,7 @@
 #include <syslog.h>
 
 #include "txttt.h"
+#include "daemonizar.h"
 
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>
@@ -281,6 +282,8 @@ int main()
   int intervalInitProy = 0;
 
   readProyInit(logTag, &intervalInitProy, 100);
+
+  daemonizar();
   
   openlog(logTag, LOG_PID | LOG_CONS, LOG_DAEMON);
 
@@ -324,6 +327,6 @@ int main()
     intervalo++;
     sleep(intervalInitProy);
   }
-  
+  endReg();
   return 0;
 }

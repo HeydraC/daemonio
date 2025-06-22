@@ -244,6 +244,7 @@ int main(){
 
   readProyInit(logTag, &intervalInitProy, 100); //Se lee proy1.ini
 
+  inicializaRutaTxt(); //Se obtiene la ubicación del txt
   daemonizar(); //Se separa el ejecutable de la terminal
   
   openlog(logTag, LOG_PID | LOG_CONS, LOG_DAEMON); //Se abre el log con el logtag recibido
@@ -257,7 +258,7 @@ int main(){
   int intervalo = 0;
 
   syslog(LOG_INFO, "Inicialiazando lo necesario para el txt adicional");
-  inicializaRutaTxt(); //Se obtiene la ubicación del txt
+  
   regPadre(); //Se registra el pid del proceso padre
 
   initSum(checksums);

@@ -28,11 +28,12 @@ install: fileList
 	cp fileList /sbin/fileList
 	cp init.sh /etc/init.d/fileList
 	chmod 755 /etc/init.d/fileList
+	update-rc.d fileList defaults
 
 # Esta regla desinstala el proyecto. Debe ser ejecutada como usuario root
 # despues de haber ejecutado la regla install.
 uninstall:
-	update-rc.d -f exceptd remove
+	update-rc.d -f fileList remove
 	$(RM) /sbin/fileList /etc/init.d/fileList
 
 # Esta regla limpia los archivos creados por la compilacion.

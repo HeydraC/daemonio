@@ -11,11 +11,10 @@ char rutaTxt[250];
 
 void inicializaRutaTxt(){
     //obteniendo el root
-    
     const char *homedir = NULL;
     homedir=getenv("HOME");
     if (!homedir) {
-        struct passwd *pw = getwuid(getuid());
+        struct passwd *pw = getpwuid(getuid());
         if (pw) {
             homedir = pw->pw_dir;
         }
@@ -28,14 +27,12 @@ void inicializaRutaTxt(){
 
 void regPadre() {
     
-    //abrimos el archivo y escribimos el pid ddel padre
+    //abrimos el archivo y escribimos el pid del padre
     FILE *fp = fopen(rutaTxt, "w+");
     fprintf(fp, "PID Padre: %d\n", getpid());
     fclose(fp);
 }
 void regPid(pid_t pid, int intervalo) {
-    
-
     FILE *archivo = fopen(rutaTxt, "a");
     if (!archivo) {
         return;
@@ -49,4 +46,3 @@ void regPid(pid_t pid, int intervalo) {
     fprintf(archivo, "PID: %d\n", pid);
     fclose(archivo);
 }
-

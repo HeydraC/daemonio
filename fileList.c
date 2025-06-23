@@ -76,7 +76,7 @@ void commands(struct dirent **files, int dirSize, char checksums[1024][1024], bo
       regPid(pid, intervalo); //Se registra el hijo en el txt
       close(pipefd[1]); //Se cierra la escritura al pipe
       while ((bytesRead = read(pipefd[0], buffer, sizeof(buffer) - 1)) > 0){ //Se lee el contenido del pipe
-        buffer[bytesRead] = '\0';
+        buffer[32] = '\0';
 
         if (strcmp(buffer, checksums[hashing(files[i]->d_name) % 1024])) //Se accede al arreglo de checksums mediante el nombre del archivo
           changed[i] = true; //Si el checksum cambia con respecto a la última revisión se marca

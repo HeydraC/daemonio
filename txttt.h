@@ -15,6 +15,4 @@ void regPadre();
 
 void regPid(pid_t pid, int intervalo);
 
-void endReg();
-
 #endif
